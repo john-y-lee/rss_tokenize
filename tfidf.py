@@ -32,6 +32,7 @@ def get_tfidf(contents):
     word_counts = vectorizer.fit_transform(contents)
     logging.debug('The word count shape {}'.format(word_counts.get_shape()))
     word = vectorizer.get_feature_names()
+    logging.debug('Total has {} words'.format(len(word)))
     tfidf = transformer.fit_transform(word_counts)
     logging.debug('Takes {} to gen TF-IDF'.format(get_process_time(start)))
     return tfidf.toarray()
