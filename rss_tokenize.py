@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import argparse
 import logging
 import jieba
@@ -182,7 +183,7 @@ if __name__ == '__main__':
         exit(0)
 
     # log level: {'CRITICAL': 50, 'FATAL': 50, 'ERROR': 40, 'WARN': 30, 'WARNING': 30, 'INFO': 20, 'DEBUG': 10, 'NOTSET': 0}
-    log_level = logging._nameToLevel.get(args.log.upper(), 30)
+    log_level = logging._nameToLevel.get(args.log.upper(), logging.WARNING)
     jieba.setLogLevel(log_level)
     init_log(os.path.abspath('log'), log_level)
 
@@ -195,7 +196,7 @@ if __name__ == '__main__':
         download_rss(args.url, rss)
 
     if os.path.exists(rss) is False:
-        # print("{} not exists, please check or renew the RSS file".format(rss))
+        print("{} not exists, please check or renew the RSS file".format(rss))
         logging.error("{} not exists, please check or renew the RSS file".format(rss))
         exit(0)
 
@@ -208,7 +209,7 @@ if __name__ == '__main__':
             for c in contents:
                 fn.write('{}\n'.format(c))
     except Exception as e:
-        # print("Write description file to {} failed with {}".format(descr, e))
+        print("Write description file to {} failed with {}".format(descr, e))
         logging.error("Write description file to {} failed with {}".format(descr, e))
 
     logging.info("Start to tokenize contents, filter: {}".format(args.filter))
@@ -219,6 +220,8 @@ if __name__ == '__main__':
         with open(output, 'w') as fn:
             for t in t_content:
                 fn.write('{}\n'.format(' '.join(t)))
+        print("Porcess completed")
+        logging.info("Process completed")
     except Exception as e:
-        # print("Write output file to {} failed with {}".format(output, e))
+        print("Write output file to {} failed with {}".format(output, e))
         logging.error("Write output file to {} failed with {}".format(output, e))
