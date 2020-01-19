@@ -10,7 +10,8 @@ import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
 
 target_tag = 'description'
-stop_words = ['__', '，']
+# stop_words = ['__', '，']
+stop_words = []
 
 
 def init_log(log_path, log_level=logging.WARNING):
@@ -32,6 +33,9 @@ def get_process_time(start):
 
 
 def is_valid_word(w):
+    # self define valid word
+    # a-z, A-Z, 0-9, and multi-bytes characters (word length is 1)
+    # Non stop words
     valid_word = False
     if len(w) == 1:
         # keep a-z, A-Z, 0-9, and multi-bytes characters
@@ -92,12 +96,13 @@ def extract_tag(rss, download=False):
     start = time.time()
     tree = ET.parse(rss)
     root = tree.getroot()
-    stack = [root]
+    queue = [root]
     node_content = []
     # search all nodes children for target tag
     url_count = 0
-    while len(stack) > 0:
-        node = stack.pop(0)
+    while len(queue) > 0:
+
+        node = queue.pop(0)
         if node.tag == target_tag:
             nodetext = node.text.replace('\n', '')
             if download:
@@ -120,7 +125,7 @@ def extract_tag(rss, download=False):
             continue
         ch = node.getchildren()
         if len(ch) > 0:
-            stack.extend(ch)
+            queue.extend(ch)
     logging.debug("Takes {} to extract tag, download url count: {}".format(get_process_time(start), url_count))
     return node_content
 
