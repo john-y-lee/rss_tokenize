@@ -3,8 +3,7 @@ import logging
 import os
 import time
 
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 def init_log(log_path, log_level=logging.WARNING):
@@ -25,15 +24,56 @@ def get_process_time(start):
     return '{} hours, {} minutes, {} seconds'.format(int(hours), int(mins), sec)
 
 
-def get_tfidf(contents):
+def get_tfidf(contents, ngram=None, max_df=None, min_df=None):
     start = time.time()
-    vectorizer = CountVectorizer()
-    transformer = TfidfTransformer()
-    word_counts = vectorizer.fit_transform(contents)
-    logging.debug('The word count shape {}'.format(word_counts.get_shape()))
-    word = vectorizer.get_feature_names()
-    logging.debug('Total has {} words'.format(len(word)))
-    tfidf = transformer.fit_transform(word_counts)
+
+    vectorizer = TfidfVectorizer()
+    if ngram is not None:
+        # verify format
+        # format should be two integer join with ',' such as 1,1 or 1,2
+        try:
+            sp_n = ngram.split(',')
+            if len(sp_n) == 2:
+                ngram_range = tuple([int(v) for v in sp_n])
+                vectorizer.set_params(ngram_range=ngram_range)
+        except Exception as e:
+            logging.warning("Wrong format for ngram with {}, {}".format(ngram, e))
+    if max_df is not None:
+        # verify format
+        # should be float of integer
+        try:
+            if '.' in max_df:
+                max_df = float(max_df)
+                if max_df > 1.0:
+                    max_df = 1.0
+                if max_df < 0.0:
+                    max_df = 0.0
+            else:
+                max_df = int(max_df)
+            vectorizer.set_params(max_df=max_df)
+        except Exception as e:
+            logging.warning("Wrong format for max_df with {}, {}".format(max_df, e))
+    if min_df is not None:
+        # verify format
+        # should be float of integer
+        try:
+            if '.' in min_df:
+                min_df = float(min_df)
+                if min_df > 1.0:
+                    min_df = 1.0
+                if min_df < 0.0:
+                    min_df = 0.0
+            else:
+                min_df = int(min_df)
+            vectorizer.set_params(min_df=min_df)
+        except Exception as e:
+            logging.warning("Wrong format for min_df with {}, {}".format(min_df, e))
+
+    tfidf = vectorizer.fit_transform(contents)
+
+    words = vectorizer.get_feature_names()
+    logging.debug('Total has {} words. First 5 are {}'.format(len(words), words[:min(5, len(words))]))
+
     logging.debug('Takes {} to gen TF-IDF'.format(get_process_time(start)))
     return tfidf.toarray()
 
@@ -42,6 +82,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='TF-IDF')
     parser.add_argument('-i', '--input', type=str, help='The Tokenized File Path', default='output_1.txt')
     parser.add_argument('-o', '--output', type=str, help='The TFIDF Result File Path', default='output.txt')
+    parser.add_argument('-n', '--ngram', type=str, help='The lower and upper boundary of the range of n-values for different n-grams to be extracted.')
+    parser.add_argument('-m', '--min_df', type=str, help='When building the vocabulary ignore terms that have a document frequency strictly lower than the given threshold.')
+    parser.add_argument('-M', '--max_df', type=str, help='When building the vocabulary ignore terms that have a document frequency strictly higher than the given threshold.')
     parser.add_argument('-l', '--log', type=str, help='Log Level', default='WARNING')
 
     try:
@@ -63,17 +106,17 @@ if __name__ == '__main__':
 
     logging.info("Start to load tokenized data from {}".format(input_file))
     with open(input_file, 'r') as fn:
-        # contents = [l.strip().split(' ') for l in fn]
         contents = [l.strip() for l in fn]
-    # import pdb; pdb.set_trace()
     content_len = len(contents)
 
-    logging.info("Start to compute TF-IDF")
-    tfidf = get_tfidf(contents)
+    logging.info("Start to calculate TF-IDF")
+    tfidf = get_tfidf(contents, ngram=args.ngram,
+                      max_df=args.max_df, min_df=args.min_df)
 
     tfidf_len = len(tfidf)
 
     if content_len != tfidf_len:
+        print("Something wrong, {} contents, {} TF-IDF".format(content_len, tfidf_len))
         logging.error("Something wrong, {} contents, {} TF-IDF".format(content_len, tfidf_len))
         exit(0)
 
@@ -81,3 +124,5 @@ if __name__ == '__main__':
     with open(output_file, 'w') as fn:
         for i in range(content_len):
             fn.write('{}, {}\n'.format(contents[i], str([v for v in tfidf[i]])))
+    print("Process completed")
+    logging.info("Process completed")
