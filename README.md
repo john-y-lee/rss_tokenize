@@ -1,16 +1,16 @@
 # rss_tokenize
 # Programing Language: python 3.6
 # Modules Information
-* jieba
+* jieba  
 A tokenizer which supports Chinese.  
 [URL] https://pypi.org/project/jieba/
 
-* beautifulsoup4
+* beautifulsoup4  
 A module which could parse HTML tag.  
 [URL] https://pypi.org/project/beautifulsoup4/
 
 # Install Modules
-* installation command
+* installation command  
 pip3 install -r requirements.txt
 
 # Process Flow
@@ -24,7 +24,7 @@ pip3 install -r requirements.txt
 
 # How to execute
 * python3.6 rss_tokenize.py [arguments]
-* Arguments
+* Arguments  
  -i  --input          The file path of RSS. Default: news.rss  
  -o  --output         The file path of tokenized result. Default: output.txt  
  -d  --description    The file path of description. Default: description.txt  
@@ -42,12 +42,12 @@ The parameter of "stop_words" could modify manually in code.
 # tfidf
 # Programing Language: python 3.6
 # Modules Information
-* scikit-learn
+* scikit-learn  
 A well known machine learning module  
 [URL] https://scikit-learn.org/stable/
 
 # Install Modules
-* installation command
+* installation command  
 pip3 install -r requirements.txt
 
 # Process Flow
@@ -57,7 +57,7 @@ pip3 install -r requirements.txt
 
 # How to execute
 * python3.6 tfidf.py [arguments]
-* Arguments
+* Arguments  
  -i  --input          The file path of description file. Default: output_1.txt  
  -o  --output         The file path of result with TF-IDF. Default: output.txt  
  -l  --log            Log level flag. Default: WARNING  
