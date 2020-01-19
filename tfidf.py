@@ -54,6 +54,7 @@ if __name__ == '__main__':
     output_file = os.path.abspath(args.output)
 
     log_level = logging._nameToLevel.get(args.log.upper(), logging.WARNING)
+    init_log(os.path.abspath('log'), log_level)
 
     if os.path.exists(input_file) is False:
         print('{} not exists'.format(input_file))
